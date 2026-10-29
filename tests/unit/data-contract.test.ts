@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
  * TypeScript types for it later, this test is the evidence they are right.
  */
 
-const DATA_DIR = 'public/phones';
+const DATA_DIR = 'public/data/phones';
 const readJson = (file: string): unknown => JSON.parse(readFileSync(join(DATA_DIR, file), 'utf8'));
 
 const list = readJson('phones.json') as Array<Record<string, unknown>>;

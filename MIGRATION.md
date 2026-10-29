@@ -213,3 +213,52 @@ review.
 
 **Tests:** 80 unit (4 for the detail component, 1 for `checkmark`), 21 browser. All green; no
 browser test changed.
+
+## Step 4: React Router takes over the URLs
+
+**Tag:** `step-4`. **What changed:** routing, the HTML entry point, where the data is served from,
+and the URL format.
+
+With both screens in React, AngularJS was doing one job: reading the URL and choosing a screen.
+We replaced that with React Router (`src/routes.tsx`) and stopped bootstrapping AngularJS. The
+AngularJS code is now dead but still in the repository; step 5 deletes it.
+
+- **Same routes, clean URLs.** `/phones` and `/phones/:phoneId`, and anything else redirects to the
+  list, exactly like `otherwise('/phones')`. The `#!` is gone.
+- **Old links keep working.** Before the router starts, `src/legacyUrls.ts` rewrites any AngularJS
+  hash URL (`/index.html#!/phones/nexus-s`, and the pre-1.6 `#/phones/nexus-s` style) to the new
+  path with `history.replaceState`, so there is no redirect flash and no extra history entry. Users'
+  bookmarks, links in old emails and search engine results all still land on the right page.
+- **The characterisation tests changed in exactly one place:** the `urls` object at the top of the
+  file. We added four tests for the old URLs.
+
+### What broke, and why it is the interesting part
+
+The first run of the browser tests after switching the router failed 9 of 25 tests: every
+detail page showed "could not find that phone". The data layer asked for `phones/nexus-s.json`, a
+*relative* URL. With hash URLs the page was always `/index.html`, so that resolved to
+`/phones/nexus-s.json`. With clean URLs the page is `/phones/nexus-s`, so the same request went to
+`/phones/phones/nexus-s.json`. Images on the detail page had the same problem. None of our unit tests
+caught this, because each unit is correct on its own; the browser tests caught it immediately,
+which is why we keep them.
+
+We fixed it in two ways:
+
+- Data and image URLs are now root-relative (`/data/phones/...`, `/img/phones/...`), built from
+  Vite's `BASE_URL` so the app can still be deployed under a sub-path. Image paths are resolved when
+  rendering, not when loading, so the search still sees exactly the original data.
+- The JSON moved from `/phones/` to `/data/phones/`. With clean URLs, a folder called `phones` next
+  to a page called `/phones` is a trap: a common static-server setup will see the folder and
+  redirect `/phones` to `/phones/` or return a directory error instead of the app. In a real project
+  this is the moment to talk to whoever runs the web server.
+
+### Trade-off: clean URLs need server support
+
+Hash URLs work on any static host because the server only ever sees `/index.html`. Clean URLs
+need the server to answer `/phones/nexus-s` with `index.html` (an "SPA fallback"). Vite's preview
+server does this, and most hosts support it with one line of configuration, but it must be done
+before go-live or deep links will return 404. If that is not possible, React Router's
+`createHashRouter` keeps hash URLs and the rest of this step still applies.
+
+**Tests:** 91 unit (redirect mapping and data layer tests added), 25 browser (4 added for old
+URLs). All green.

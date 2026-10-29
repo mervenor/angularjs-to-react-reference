@@ -25,11 +25,11 @@ describe('<PhoneDetail>', () => {
     const user = userEvent.setup();
     const { container } = render(<PhoneDetail phoneId="nexus-s" />);
     await screen.findByRole('heading', { level: 1 });
-    expect(mainImage(container)).toHaveAttribute('src', 'img/phones/nexus-s.0.jpg');
+    expect(mainImage(container)).toHaveAttribute('src', '/img/phones/nexus-s.0.jpg');
 
     const thumbs = container.querySelectorAll<HTMLImageElement>('.phone-thumbs img');
     await user.click(thumbs[2]!);
-    expect(mainImage(container)).toHaveAttribute('src', 'img/phones/nexus-s.2.jpg');
+    expect(mainImage(container)).toHaveAttribute('src', '/img/phones/nexus-s.2.jpg');
   });
 
   it('says so when the phone does not exist (new: the original showed an empty page)', async () => {
@@ -39,7 +39,7 @@ describe('<PhoneDetail>', () => {
   });
 
   it('says so when the phone cannot be loaded', async () => {
-    mockFetchFromPublic({ 'phones/nexus-s.json': 500 });
+    mockFetchFromPublic({ 'data/phones/nexus-s.json': 500 });
     render(<PhoneDetail phoneId="nexus-s" />);
     expect(await screen.findByRole('alert')).toHaveTextContent('could not load this phone');
   });

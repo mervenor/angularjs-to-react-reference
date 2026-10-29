@@ -12,11 +12,12 @@ import { expect, test, type Page } from '@playwright/test';
  */
 
 // The only framework-specific detail: what the address bar looks like.
+// Step 4 changed it from AngularJS hash URLs (index.html#!/phones) to clean paths.
 const urls = {
-  list: 'index.html#!/phones',
-  detail: (id: string) => `index.html#!/phones/${id}`,
-  isList: /#!\/phones$/,
-  isDetail: (id: string) => new RegExp(`#!/phones/${id}$`),
+  list: 'phones',
+  detail: (id: string) => `phones/${id}`,
+  isList: /\/phones$/,
+  isDetail: (id: string) => new RegExp(`/phones/${id}$`),
 };
 
 const phoneItems = (page: Page) => page.locator('.phones li');
@@ -60,6 +61,30 @@ test.describe('routing', () => {
     await page.goBack();
     await expect(page).toHaveURL(urls.isList);
     await expect(phoneItems(page)).toHaveCount(20);
+  });
+});
+
+test.describe('old AngularJS URLs (added in step 4)', () => {
+  test('a bookmarked phone page still opens the phone', async ({ page }) => {
+    await page.goto('index.html#!/phones/nexus-s');
+    await expect(page).toHaveURL(urls.isDetail('nexus-s'));
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nexus S');
+  });
+
+  test('a bookmarked list page still opens the list', async ({ page }) => {
+    await page.goto('index.html#!/phones');
+    await expect(page).toHaveURL(urls.isList);
+    await expect(phoneItems(page)).toHaveCount(20);
+  });
+
+  test('pre-1.6 hash URLs without "!" are handled too', async ({ page }) => {
+    await page.goto('#/phones/nexus-s');
+    await expect(page).toHaveURL(urls.isDetail('nexus-s'));
+  });
+
+  test('an unknown clean path redirects to the list', async ({ page }) => {
+    await page.goto('no-such-page');
+    await expect(page).toHaveURL(urls.isList);
   });
 });
 

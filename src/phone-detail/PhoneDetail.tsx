@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PhoneApiError, fetchPhone } from '../phones/api';
+import { PhoneApiError, assetUrl, fetchPhone } from '../phones/api';
 import { checkmark } from '../phones/checkmark';
 import type { Phone } from '../phones/types';
 
@@ -36,7 +36,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
   return (
     <>
       <div className="phone-images">
-        <img src={mainImageUrl} className="phone selected" />
+        <img src={mainImageUrl && assetUrl(mainImageUrl)} className="phone selected" />
       </div>
 
       <h1>{phone.name}</h1>
@@ -46,7 +46,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
       <ul className="phone-thumbs">
         {phone.images.map((img) => (
           <li key={img}>
-            <img src={img} onClick={() => setMainImageUrl(img)} />
+            <img src={assetUrl(img)} onClick={() => setMainImageUrl(img)} />
           </li>
         ))}
       </ul>

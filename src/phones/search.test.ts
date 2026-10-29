@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import phones from '../../public/phones/phones.json';
+import phones from '../../public/data/phones/phones.json';
 import { SEARCH_CASES, SORT_KEYS, caseKey } from '../../tests/fixtures/search-cases';
 import recorded from '../../tests/fixtures/search-behaviour.json';
 import type { PhoneSummary } from './types';

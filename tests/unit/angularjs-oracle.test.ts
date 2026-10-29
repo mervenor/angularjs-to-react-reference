@@ -1,7 +1,7 @@
 import angular from 'angular';
 import 'angular-resource';
 import { beforeAll, describe, expect, it } from 'vitest';
-import phones from '../../public/phones/phones.json';
+import phones from '../../public/data/phones/phones.json';
 import { SEARCH_CASES, SORT_KEYS, caseKey } from '../fixtures/search-cases';
 
 /*

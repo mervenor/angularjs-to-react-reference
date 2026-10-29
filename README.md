@@ -4,7 +4,7 @@ A worked, step-by-step migration of [angular-phonecat](https://github.com/angula
 the official AngularJS 1.x tutorial app, to React and TypeScript. Both frameworks run side by side
 until AngularJS is removed, and the same behaviour tests stay green at every step.
 
-**You are looking at step 3.** Both screens are React; routing is still AngularJS. Step 0 added the tests
+**You are looking at step 4.** React and React Router run the app; the AngularJS code is unused and is removed in step 5. Step 0 added the tests
 that describe what it does. See [MIGRATION.md](MIGRATION.md) for the guide.
 
 ```bash

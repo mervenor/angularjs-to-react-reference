@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fetchPhones } from '../phones/api';
+import { Link } from 'react-router';
+import { phoneHref } from '../paths';
+import { assetUrl, fetchPhones } from '../phones/api';
 import { SORT_OPTIONS, filterPhones, isSortKey, sortPhones, type SortKey } from '../phones/search';
 import type { PhoneSummary } from '../phones/types';
-import { phoneHref } from '../routes';
 
 /** React port of the phone-list AngularJS component. Same markup and classes, same behaviour. */
 export function PhoneList() {
@@ -51,10 +52,10 @@ export function PhoneList() {
           <ul className="phones">
             {visible.map((phone) => (
               <li key={phone.id} className="thumbnail phone-list-item">
-                <a href={phoneHref(phone.id)} className="thumb">
-                  <img src={phone.imageUrl} alt={phone.name} />
-                </a>
-                <a href={phoneHref(phone.id)}>{phone.name}</a>
+                <Link to={phoneHref(phone.id)} className="thumb">
+                  <img src={assetUrl(phone.imageUrl)} alt={phone.name} />
+                </Link>
+                <Link to={phoneHref(phone.id)}>{phone.name}</Link>
                 <p>{phone.snippet}</p>
               </li>
             ))}
