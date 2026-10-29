@@ -1,8 +1,10 @@
-logs/*
-!.gitkeep
 node_modules/
 app/lib/
-tmp
+dist/
+coverage/
+test-results/
+playwright-report/
+*.log
 .DS_Store
-.idea
-angular-phonecat-snapshots
+.idea/
+.vscode/

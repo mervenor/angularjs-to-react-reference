@@ -1,0 +1,111 @@
+[
+  {
+    "section": "Availability and Networks",
+    "entries": [
+      "dt: Availability",
+      "dd: M1,",
+      "dd: O2,",
+      "dd: Orange,",
+      "dd: Singtel,",
+      "dd: StarHub,",
+      "dd: T-Mobile,",
+      "dd: Vodafone"
+    ]
+  },
+  {
+    "section": "Battery",
+    "entries": [
+      "dt: Type",
+      "dd: Lithium Ion (Li-Ion) (1500 mAH)",
+      "dt: Talk Time",
+      "dd: 6 hours",
+      "dt: Standby time (max)",
+      "dd: 428 hours"
+    ]
+  },
+  {
+    "section": "Storage and Memory",
+    "entries": [
+      "dt: RAM",
+      "dd: 512MB",
+      "dt: Internal Storage",
+      "dd: 16384MB"
+    ]
+  },
+  {
+    "section": "Connectivity",
+    "entries": [
+      "dt: Network Support",
+      "dd: Quad-band GSM: 850, 900, 1800, 1900\r\nTri-band HSPA: 900, 2100, 1700\r\nHSPA type: HSDPA (7.2Mbps) HSUPA (5.76Mbps)",
+      "dt: WiFi",
+      "dd: 802.11 b/g/n",
+      "dt: Bluetooth",
+      "dd: Bluetooth 2.1",
+      "dt: Infrared",
+      "dd: ✘",
+      "dt: GPS",
+      "dd: ✓"
+    ]
+  },
+  {
+    "section": "Android",
+    "entries": [
+      "dt: OS Version",
+      "dd: Android 2.3",
+      "dt: UI",
+      "dd: Android"
+    ]
+  },
+  {
+    "section": "Size and Weight",
+    "entries": [
+      "dt: Dimensions",
+      "dd: 63.0 mm (w)",
+      "dd: 123.9 mm (h)",
+      "dd: 10.88 mm (d)",
+      "dt: Weight",
+      "dd: 129.0 grams"
+    ]
+  },
+  {
+    "section": "Display",
+    "entries": [
+      "dt: Screen size",
+      "dd: 4.0 inches",
+      "dt: Screen resolution",
+      "dd: WVGA (800 x 480)",
+      "dt: Touch screen",
+      "dd: ✓"
+    ]
+  },
+  {
+    "section": "Hardware",
+    "entries": [
+      "dt: CPU",
+      "dd: 1GHz Cortex A8 (Hummingbird) processor",
+      "dt: USB",
+      "dd: USB 2.0",
+      "dt: Audio / headphone jack",
+      "dd: 3.5mm",
+      "dt: FM Radio",
+      "dd: ✘",
+      "dt: Accelerometer",
+      "dd: ✓"
+    ]
+  },
+  {
+    "section": "Camera",
+    "entries": [
+      "dt: Primary",
+      "dd: 5.0 megapixels",
+      "dt: Features",
+      "dd: Flash, Video"
+    ]
+  },
+  {
+    "section": "Additional Features",
+    "entries": [
+      "dd: Contour Display, Near Field Communications (NFC), Three-axis gyroscope, Anti-fingerprint display coating, Internet Calling support (VoIP/SIP)"
+    ]
+  }
+]

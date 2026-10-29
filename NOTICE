@@ -1,0 +1,20 @@
+angularjs-to-react-reference
+Copyright (c) 2026 Mervenor
+
+This repository is a derivative work of angular-phonecat, the official
+AngularJS tutorial application:
+
+  Project:   angular-phonecat
+  Source:    https://github.com/angular/angular-phonecat
+  Commit:    ef6f6eb672ded472b4e442d598f5df40d0e0642c ("step-14 Animations")
+  Committed: 2020-06-05
+  Licence:   MIT, Copyright (c) 2010-2012 Google, Inc. http://angularjs.org
+
+The tag `upstream` in this repository holds the unmodified files from that
+commit (without the upstream git history). The phone data (app/phones,
+later public/data/phones) and the phone images (app/img, later public/img)
+come from angular-phonecat unchanged.
+
+angular-phonecat is not affiliated with, and does not endorse, this
+repository or Mervenor. Product names in the sample data belong to their
+respective owners.
