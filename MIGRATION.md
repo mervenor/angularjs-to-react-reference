@@ -90,3 +90,52 @@ rely on:
 
 A migration is the wrong moment to "fix" these silently. We kept them all, and noted them as
 candidates for a product decision after the migration.
+
+## Step 1: a modern build that still runs the old app
+
+**Tag:** `step-1`. **What changed:** how the app is built and served, plus the bridge. No screen
+has changed yet.
+
+Before React can move in, the app needs a build that understands TypeScript, JSX and npm imports.
+We chose Vite, and made it serve the *unchanged* AngularJS app first:
+
+- The original JavaScript files moved to `src/legacy/` with `git mv`, so `git log --follow` still
+  shows their history. Their contents did not change.
+- Eleven `<script>` tags became one entry point, `src/main.ts`, which imports the libraries and
+  the legacy files in the original order (`src/legacy/index.ts`).
+- The data and images moved to `public/`, so they are served at the same paths as before.
+- The HTML templates are imported as strings and put into AngularJS's template cache. The
+  components still say `templateUrl`, so we did not have to edit them.
+- `ng-app` became an explicit `angular.bootstrap(...)` call with `strictDi` switched on, which fails
+  fast if anything relies on minification-unsafe injection.
+- ESLint and TypeScript (strict mode) now run on all new code. The legacy JavaScript is excluded
+  from linting on purpose: restyling code you are about to delete is wasted effort and noise in the
+  diff.
+
+### The ordering trap: jQuery before AngularJS
+
+AngularJS uses jQuery instead of its built-in jqLite only if `window.jQuery` exists *at the moment
+angular.js runs*. With script tags that was a matter of tag order. With modules, imports are
+hoisted, so a line like `window.jQuery = jQuery` placed after the imports runs too late. The fix is
+a tiny module, `src/legacy/jquery-global.ts`, imported first. Without it nothing fails loudly: the
+image animation on the detail page just stops working. No test of ours would have caught that, so
+we checked it by hand in the browser (`angular.element === window.jQuery`). On a large app, this
+class of silent ordering bug is worth a dedicated smoke test.
+
+### The bridge
+
+`src/bridge/reactComponent.tsx` turns any React component into an AngularJS component:
+
+```ts
+angular.module('phoneList').component('phoneList', reactComponent(PhoneList));
+```
+
+AngularJS owns the element and its lifetime; React owns everything inside it. Bindings are passed
+as props, changes are forwarded from AngularJS's `$onChanges`, and the React tree is unmounted in
+`$onDestroy`. It is about 60 lines and has three unit tests. We wrote it ourselves rather than use
+`react2angular`, which has not been updated since 2022 and expects `prop-types`.
+
+The browser tests now run against the production build (`vite build` then `vite preview`), because
+that is what users get.
+
+**Tests:** 28 unit (3 new for the bridge), 21 browser. All green, unchanged.

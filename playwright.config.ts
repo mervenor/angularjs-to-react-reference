@@ -18,8 +18,8 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    // Step 0: serve the untouched AngularJS app exactly as upstream did.
-    command: `http-server ./app -a localhost -p ${PORT} -c-1 --silent`,
+    // Test the production build, not the dev server: that is what users get.
+    command: 'npm run build && npm run preview',
     url: `http://localhost:${PORT}/index.html`,
     reuseExistingServer: !process.env.CI,
   },

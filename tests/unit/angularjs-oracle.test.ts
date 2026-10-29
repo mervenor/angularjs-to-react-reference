@@ -1,7 +1,7 @@
 import angular from 'angular';
 import 'angular-resource';
 import { beforeAll, describe, expect, it } from 'vitest';
-import phones from '../../app/phones/phones.json';
+import phones from '../../public/phones/phones.json';
 import { SEARCH_CASES, SORT_KEYS, caseKey } from '../fixtures/search-cases';
 
 /*
@@ -16,10 +16,10 @@ let $filter: angular.IFilterService;
 beforeAll(async () => {
   // The legacy files are plain scripts that expect a global `angular`.
   (globalThis as unknown as { angular: angular.IAngularStatic }).angular = angular;
-  await import('../../app/core/phone/phone.module.js');
-  await import('../../app/core/phone/phone.service.js');
-  await import('../../app/core/core.module.js');
-  await import('../../app/core/checkmark/checkmark.filter.js');
+  await import('../../src/legacy/core/phone/phone.module.js');
+  await import('../../src/legacy/core/phone/phone.service.js');
+  await import('../../src/legacy/core/core.module.js');
+  await import('../../src/legacy/core/checkmark/checkmark.filter.js');
   $filter = angular.injector(['ng', 'core']).get('$filter');
 });
 
