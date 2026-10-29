@@ -18,7 +18,8 @@ in the middle.
 
 1. **Behaviour first.** Before changing anything we wrote tests that record what the original app
    does, quirks included. These are characterisation tests: they describe, they do not judge.
-2. **Green at every step.** Every tag passes type-check, lint, unit tests and the browser tests.
+2. **Green at every step.** Every tag passes its type-check, unit tests and browser tests, and from
+   step 1 also lint and a production build.
 3. **Change behaviour only on purpose.** When we did change behaviour (for example, a better error
    message, or clean URLs), the commit says so and the test change is visible in the diff.
 4. **Small, reversible steps.** Each step can ship on its own. If a step goes wrong, you roll back
@@ -119,7 +120,7 @@ angular.js runs*. With script tags that was a matter of tag order. With modules,
 hoisted, so a line like `window.jQuery = jQuery` placed after the imports runs too late. The fix is
 a tiny module, `src/legacy/jquery-global.ts`, imported first. Without it nothing fails loudly: the
 image animation on the detail page just stops working. No test of ours would have caught that, so
-we checked it by hand in the browser (`angular.element === window.jQuery`). On a large app, this
+we checked it with a one-off script in a real browser (`angular.element === window.jQuery`). On a large app, this
 class of silent ordering bug is worth a dedicated smoke test.
 
 ### The bridge
@@ -282,8 +283,8 @@ be fixed because it is out of support, plus jQuery and Bootstrap) to none.
 ### Bootstrap
 
 The app used three things from Bootstrap 3: base typography, a two-column grid and the
-`thumbnail` box. We wrote those out in `src/styles/base.css` (about 150 lines, values copied from
-Bootstrap 3.3.7) and dropped a 120 kB stylesheet. Moving to Bootstrap 5 was the alternative, but it
+`thumbnail` box. We wrote those out in `src/styles/base.css` (about 125 lines, written to look as
+Bootstrap 3.3.7 did here, and checked against screenshots of the original) and dropped a 120 kB stylesheet. Moving to Bootstrap 5 was the alternative, but it
 renames the classes we used, so it would have been a redesign rather than a clean-up.
 
 **Our tests missed a regression here.** Bootstrap also had a rule that keeps images inside
@@ -319,8 +320,8 @@ copied them. We fixed:
 
 Both pages now have no axe violations at WCAG 2.1 A and AA plus axe's best-practice rules. Three
 browser tests keep it that way, including one that uses the thumbnails with the keyboard.
-Automated tools find only part of the problems, so we also checked keyboard use by hand; a real
-audit would include screen reader testing.
+Automated tools find only some problems; a real audit would add manual keyboard and screen reader
+testing, which we have not done here.
 
 ### The one deliberate change to a characterisation test
 
@@ -330,3 +331,84 @@ reads `p` elements as well, and the snapshot diff is one line: `"dd: Contour Dis
 and reviewed.
 
 **Tests:** 87 unit, 29 browser (3 accessibility tests and the layout test added). All green.
+
+## Step 6: final checks and the numbers
+
+**Tag:** `step-6`. **What changed:** a CI workflow, the final README with the before and after
+numbers, and this section.
+
+We checked out each of the tags `step-0` to `step-5` into a clean folder, ran `npm ci`, and ran
+that step's full check: type-check, lint (from step 1), unit tests, production build (from step 1)
+and the browser tests in headless Chromium. All of them pass. `step-6` changes no application code;
+we ran `npm run check` on it before tagging. `.github/workflows/ci.yml` runs the same
+`npm run check` on every push and pull request; it has not run on GitHub yet, because this
+repository was built and tested locally.
+
+Sizes in kB, gzipped, as reported by `vite build`:
+
+| Tag | Unit tests | Browser tests | JavaScript | CSS |
+| --- | ---: | ---: | ---: | ---: |
+| `step-0` | 25 | 21 | 108.5 (+1.2 templates) | 20.5 |
+| `step-1` | 28 | 21 | 109.8 | 19.9 |
+| `step-2` | 75 | 21 | 178.7 | 19.9 |
+| `step-3` | 80 | 21 | 178.7 | 19.9 |
+| `step-4` | 91 | 25 | 100.2 | 19.9 |
+| `step-5` | 87 | 29 | 83.4 | 1.0 |
+| `step-6` | 87 | 29 | 83.4 | 1.0 |
+
+Step 0 has no build; its sizes are the minified library builds and app files it loads, gzipped
+with zlib. Step 1 ships no React yet: nothing renders with it, so the bundler leaves it out. The
+hybrid steps are the most expensive to ship: in steps 2 and 3 users download AngularJS, jQuery
+*and* React, about 65% more JavaScript than the original. Step 4 drops AngularJS from the bundle
+because nothing bootstraps it any more. On this app the hybrid period lasted four commits. On a real app it can last
+months, which is a reason to plan the order of screens around traffic and to keep the hybrid period
+short, not a reason to avoid it.
+
+The before and after table is in the [README](README.md#before-and-after).
+
+## What we would do differently on a large app
+
+This app has two screens, one service and no forms, so it shows the method rather than the hard
+parts. On a production AngularJS app we would change the following.
+
+- **Inventory with numbers, not impressions.** Count components, directives, services, filters and
+  third-party AngularJS modules (ui-router, ui-bootstrap, ui-grid and so on), and map which screens
+  use which. Pair that with analytics: migrate the screens that matter most to users and revenue
+  first, and leave rarely used admin screens for last, or retire them.
+- **Characterisation tests where the risk is, not everywhere.** We covered this app completely.
+  On a large app we would cover the main user journeys, anything involving money or personal data,
+  and record the API traffic the front end depends on. We would add screenshot comparisons from day
+  one: our behaviour tests missed a layout regression in step 5.
+- **A two-way bridge and shared services.** React components will need things AngularJS owns
+  today: the signed-in user, HTTP interceptors that add auth headers, feature flags. We would move
+  those into plain TypeScript modules that both frameworks import, instead of reaching into
+  AngularJS's dependency injection from React. We would also need the reverse bridge, rendering an
+  AngularJS screen inside a React route, if the router has to move before the last screen does.
+- **Move the router at the right moment.** Here the router moved after all the screens. With 50
+  screens, we would usually put React Router in charge early and wrap the remaining AngularJS
+  screens, so that new work is all React and the clean URLs ship sooner.
+- **Ship every step.** Each step here could go to production on its own. On a client project it
+  would, behind a feature flag where the risk is high, with error monitoring watched after each
+  release. A migration branch that lives for months is a rewrite with extra steps.
+- **Validate data at the boundary.** Our data is static files we control, so tests were enough.
+  A real API drifts; we would validate responses at runtime where the data layer receives them.
+- **Keep a differences log.** Every deliberate change in behaviour (error messages, the lost
+  animations, the accessibility fixes, the URL change) goes on one list that the product owner signs
+  off. Quirks such as the "search everything" behaviour go on the same list as product decisions
+  for after the migration.
+- **Expect the hard parts to be elsewhere.** Forms built on `ng-model` and its validators,
+  directives that manipulate the DOM directly, code that depends on digest timing or `$scope`
+  events, and abandoned third-party modules take most of the time on real migrations. None of them
+  appear in this app.
+
+## Summary
+
+| Decision | What we gained | What it cost |
+| --- | --- | --- |
+| Characterisation tests before any change | Caught the relative URL bug in step 4; proved the search port exact | Test writing before any visible progress |
+| Recording AngularJS's own output as an oracle | The port matched all 40 cases; the evidence outlived AngularJS | Keeping quirks we would not have designed |
+| Strangler (both frameworks side by side) | Every step shippable and reversible | A heavier bundle while both frameworks load |
+| Keeping the original markup until step 5 | Browser tests unchanged through steps 1 to 3 | Fixing the HTML and accessibility later, in one pass |
+| Clean URLs | Shareable, readable URLs; old links redirected | The server must support an SPA fallback |
+| Dropping Bootstrap | 120 kB less CSS, no known vulnerabilities | About 125 lines of CSS to own; one regression to catch |
+| Dropping ngAnimate and jQuery | Two fewer dependencies | The list and image animations are gone |

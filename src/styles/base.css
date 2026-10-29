@@ -1,7 +1,8 @@
 /*
  * The few parts of Bootstrap 3 this app used (base typography, a two-column
  * grid and the "thumbnail" box), written out so we can drop a 120 kB
- * stylesheet and its known vulnerabilities. Values match Bootstrap 3.3.7.
+ * stylesheet and its known vulnerabilities. Written to look as Bootstrap
+ * 3.3.7 did in this app; checked against screenshots of the original.
  */
 *,
 *::before,

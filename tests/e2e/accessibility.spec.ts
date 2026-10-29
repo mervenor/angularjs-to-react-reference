@@ -1,8 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-// Automated checks catch roughly a third of accessibility problems. They are
-// a floor, not a certificate: we also checked keyboard use by hand.
+// Automated checks find only some accessibility problems. They are a floor,
+// not a certificate: a real audit adds manual keyboard and screen reader testing.
 const scan = (page: Page) =>
   new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']).analyze();
 
