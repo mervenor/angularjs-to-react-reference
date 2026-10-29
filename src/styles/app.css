@@ -7,6 +7,16 @@ h1 {
   margin-top: 0;
 }
 
+/* Was in app.animations.css, without the AngularJS animation classes. */
+.view-container {
+  position: relative;
+}
+
+.view-frame {
+  display: block;
+  margin-top: 20px;
+}
+
 /* View: Phone list */
 .phones {
   list-style: none;
@@ -65,9 +75,21 @@ h1 {
 .phone-thumbs li {
   background-color: white;
   border: 1px solid black;
-  cursor: pointer;
   display: inline-block;
   margin: 1em;
+}
+
+/* The thumbnails are buttons now (keyboard and screen reader support) but look as before. */
+.phone-thumbs button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  display: block;
+  padding: 0;
+}
+
+.phone-thumbs button[aria-pressed='true'] {
+  outline: 2px solid #337ab7;
 }
 
 .specs {
@@ -87,7 +109,8 @@ h1 {
   width: 200px;
 }
 
-.specs > li > span {
+.specs > li > h2 {
   font-size: 1.2em;
   font-weight: bold;
+  margin: 0;
 }

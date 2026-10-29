@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react';
 import { PhoneApiError, assetUrl, fetchPhone } from '../phones/api';
 import { checkmark } from '../phones/checkmark';
 import type { Phone } from '../phones/types';
+import { useDocumentTitle } from '../useDocumentTitle';
 
 type Load = { state: 'loading' } | { state: 'loaded'; phone: Phone } | { state: 'not-found' } | { state: 'failed' };
 
-/**
- * React port of the phone-detail AngularJS component. Same markup and
- * classes. Render it with a `key` per phone so state resets between phones.
- */
+const TITLES: Partial<Record<Load['state'], string>> = { 'not-found': 'Phone not found', failed: 'Phone unavailable' };
+
+/** One phone's page. Render it with a `key` per phone so state resets between phones. */
 export function PhoneDetail({ phoneId }: { phoneId: string }) {
   const [load, setLoad] = useState<Load>({ state: 'loading' });
   const [mainImageUrl, setMainImageUrl] = useState<string>();
+  useDocumentTitle(TITLES[load.state] ?? (load.state === 'loaded' ? load.phone.name : undefined));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -36,7 +37,11 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
   return (
     <>
       <div className="phone-images">
-        <img src={mainImageUrl && assetUrl(mainImageUrl)} className="phone selected" />
+        <img
+          src={mainImageUrl && assetUrl(mainImageUrl)}
+          className="phone selected"
+          alt={`${phone.name}, view ${phone.images.indexOf(mainImageUrl ?? '') + 1} of ${phone.images.length}`}
+        />
       </div>
 
       <h1>{phone.name}</h1>
@@ -44,16 +49,23 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
       <p>{phone.description}</p>
 
       <ul className="phone-thumbs">
-        {phone.images.map((img) => (
+        {phone.images.map((img, index) => (
           <li key={img}>
-            <img src={assetUrl(img)} onClick={() => setMainImageUrl(img)} />
+            <button
+              type="button"
+              aria-label={`Show image ${index + 1} of ${phone.images.length}`}
+              aria-pressed={img === mainImageUrl}
+              onClick={() => setMainImageUrl(img)}
+            >
+              <img src={assetUrl(img)} alt="" />
+            </button>
           </li>
         ))}
       </ul>
 
       <ul className="specs">
         <li>
-          <span>Availability and Networks</span>
+          <h2>Availability and Networks</h2>
           <dl>
             <dt>Availability</dt>
             {phone.availability.map((availability) => (
@@ -62,7 +74,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Battery</span>
+          <h2>Battery</h2>
           <dl>
             <dt>Type</dt>
             <dd>{phone.battery.type}</dd>
@@ -73,7 +85,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Storage and Memory</span>
+          <h2>Storage and Memory</h2>
           <dl>
             <dt>RAM</dt>
             <dd>{phone.storage.ram}</dd>
@@ -82,7 +94,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Connectivity</span>
+          <h2>Connectivity</h2>
           <dl>
             <dt>Network Support</dt>
             <dd>{phone.connectivity.cell}</dd>
@@ -97,7 +109,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Android</span>
+          <h2>Android</h2>
           <dl>
             <dt>OS Version</dt>
             <dd>{phone.android.os}</dd>
@@ -106,7 +118,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Size and Weight</span>
+          <h2>Size and Weight</h2>
           <dl>
             <dt>Dimensions</dt>
             {phone.sizeAndWeight.dimensions.map((dim) => (
@@ -117,7 +129,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Display</span>
+          <h2>Display</h2>
           <dl>
             <dt>Screen size</dt>
             <dd>{phone.display.screenSize}</dd>
@@ -128,7 +140,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Hardware</span>
+          <h2>Hardware</h2>
           <dl>
             <dt>CPU</dt>
             <dd>{phone.hardware.cpu}</dd>
@@ -143,7 +155,7 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Camera</span>
+          <h2>Camera</h2>
           <dl>
             <dt>Primary</dt>
             <dd>{phone.camera.primary}</dd>
@@ -152,9 +164,9 @@ export function PhoneDetail({ phoneId }: { phoneId: string }) {
           </dl>
         </li>
         <li>
-          <span>Additional Features</span>
-          {/* Invalid HTML (a <dd> outside a <dl>) carried over from the original; fixed in step 5. */}
-          <dd>{phone.additionalFeatures}</dd>
+          <h2>Additional Features</h2>
+          {/* Was a <dd> outside any <dl> in the original template (invalid HTML). */}
+          <p>{phone.additionalFeatures}</p>
         </li>
       </ul>
     </>

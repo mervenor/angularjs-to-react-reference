@@ -154,6 +154,20 @@ test.describe('phone list', () => {
     await expect(page).toHaveURL(urls.isDetail('motorola-xoom-with-wi-fi'));
   });
 
+  // Added in step 5 after removing Bootstrap broke this layout and no test noticed.
+  // It passes against the original app (step 0) too.
+  test('each thumbnail image fits inside its 100px link box', async ({ page }) => {
+    await expect.poll(() => allImagesLoaded(page, '.phones li img')).toBe(true);
+    const overflowing = await page.locator('.phones li a.thumb').evaluateAll((links) =>
+      links.filter((link) => {
+        const box = link.getBoundingClientRect();
+        const img = link.querySelector('img')!.getBoundingClientRect();
+        return img.width > box.width + 0.5 || img.height > box.height + 0.5;
+      }).length,
+    );
+    expect(overflowing).toBe(0);
+  });
+
   test('every thumbnail image loads', async ({ page }) => {
     await expect.poll(() => allImagesLoaded(page, '.phones li img')).toBe(true);
   });
@@ -172,7 +186,8 @@ test.describe('phone detail', () => {
     const specs = await page.locator('.specs > li').evaluateAll((sections) =>
       sections.map((section) => ({
         section: section.firstElementChild?.textContent?.trim(),
-        entries: Array.from(section.querySelectorAll('dt, dd')).map(
+        // 'p' added in step 5, when the invalid <dd> under "Additional Features" became a <p>.
+        entries: Array.from(section.querySelectorAll('dt, dd, p')).map(
           (el) => `${el.tagName.toLowerCase()}: ${el.textContent?.trim()}`,
         ),
       })),

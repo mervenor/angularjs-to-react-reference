@@ -1,13 +1,13 @@
-import { Navigate, Outlet, useParams, type RouteObject } from 'react-router';
+import { Navigate, Outlet, useParams, useRoutes, type RouteObject } from 'react-router';
 import { PhoneDetail } from './phone-detail/PhoneDetail';
 import { PhoneList } from './phone-list/PhoneList';
 
 function Layout() {
   return (
     <div className="view-container">
-      <div className="view-frame">
+      <main className="view-frame">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 }
@@ -29,3 +29,5 @@ export const routes: RouteObject[] = [
     ],
   },
 ];
+
+export const AppRoutes = () => useRoutes(routes);

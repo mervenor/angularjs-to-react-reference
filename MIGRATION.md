@@ -262,3 +262,71 @@ before go-live or deep links will return 404. If that is not possible, React Rou
 
 **Tests:** 91 unit (redirect mapping and data layer tests added), 25 browser (4 added for old
 URLs). All green.
+
+## Step 5: remove AngularJS, clean up, accessibility pass
+
+**Tag:** `step-5`. **What changed:** deletions, a replacement for Bootstrap's CSS, and
+accessibility fixes.
+
+### Removal
+
+Nothing imported the AngularJS code any more, so we deleted it in one go: `src/legacy/` (the
+original app), the bridge, the AngularJS oracle test, the animation stylesheet, and seven packages
+(`angular`, `angular-animate`, `angular-resource`, `angular-route`, `jquery`, `bootstrap`,
+`@types/angular`). The recorded search behaviour stays: `src/phones/search.test.ts` still checks
+the port against the file AngularJS wrote in step 0, so the evidence outlives the framework.
+
+`npm audit` went from 3 known vulnerabilities in the runtime packages (AngularJS, which will not
+be fixed because it is out of support, plus jQuery and Bootstrap) to none.
+
+### Bootstrap
+
+The app used three things from Bootstrap 3: base typography, a two-column grid and the
+`thumbnail` box. We wrote those out in `src/styles/base.css` (about 150 lines, values copied from
+Bootstrap 3.3.7) and dropped a 120 kB stylesheet. Moving to Bootstrap 5 was the alternative, but it
+renames the classes we used, so it would have been a redesign rather than a clean-up.
+
+**Our tests missed a regression here.** Bootstrap also had a rule that keeps images inside
+`.thumbnail` links from overflowing. Without it, every thumbnail in the list spilled out of its
+box. All 28 browser tests still passed, because they check behaviour, not layout. We spotted it by
+comparing screenshots of step 0 and step 5. We then wrote a test for it, confirmed it fails without
+the fix (20 of 20 thumbnails overflow), passes with it, and passes against the original app at
+step 0, and added it to the characterisation suite. Lesson: before removing a CSS framework, add
+screenshot comparisons for the main pages, or at least layout assertions like this one.
+
+We also switched React Router from its data-router mode (`createBrowserRouter`) to declarative
+mode (`<BrowserRouter>`). We use no loaders or actions, and it made the JavaScript bundle about
+17 kB smaller (gzipped).
+
+### Accessibility pass
+
+We measured first: ESLint's `jsx-a11y` rules reported 4 errors, and axe (an automated
+accessibility checker, run in the browser tests) reported 5 problems on the list page and 4 on the
+detail page, including an unlabelled search box and sort menu and five images with no text
+alternative. The original AngularJS app has the same axe results; the React port had faithfully
+copied them. We fixed:
+
+- labels for the search box and the sort menu;
+- a text alternative for the main image, and thumbnails that are real buttons (so they work with
+  the keyboard) with names such as "Show image 3 of 4" and a pressed state;
+- the duplicate thumbnail link in each list item is hidden from screen readers and the tab order,
+  because the name link next to it goes to the same place;
+- a live region that announces how many phones are shown as you type;
+- a `<main>` landmark, an `<h1>` on the list page (visually hidden), `<h2>` headings for the
+  specification groups, and a page title per page;
+- the invalid `<dd>` outside a `<dl>`, now a paragraph;
+- a viewport meta tag and a visible keyboard focus style.
+
+Both pages now have no axe violations at WCAG 2.1 A and AA plus axe's best-practice rules. Three
+browser tests keep it that way, including one that uses the thumbnails with the keyboard.
+Automated tools find only part of the problems, so we also checked keyboard use by hand; a real
+audit would include screen reader testing.
+
+### The one deliberate change to a characterisation test
+
+Fixing the `<dd>` changed what the specification snapshot reads, so we updated it. The test now
+reads `p` elements as well, and the snapshot diff is one line: `"dd: Contour Display..."` became
+`"p: Contour Display..."`. That is how a characterisation test should change: on purpose, visibly,
+and reviewed.
+
+**Tests:** 87 unit, 29 browser (3 accessibility tests and the layout test added). All green.

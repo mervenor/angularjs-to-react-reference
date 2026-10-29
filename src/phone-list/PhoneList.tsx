@@ -4,13 +4,15 @@ import { phoneHref } from '../paths';
 import { assetUrl, fetchPhones } from '../phones/api';
 import { SORT_OPTIONS, filterPhones, isSortKey, sortPhones, type SortKey } from '../phones/search';
 import type { PhoneSummary } from '../phones/types';
+import { useDocumentTitle } from '../useDocumentTitle';
 
-/** React port of the phone-list AngularJS component. Same markup and classes, same behaviour. */
+/** The phone list: search, sort, and a link to each phone. */
 export function PhoneList() {
   const [phones, setPhones] = useState<PhoneSummary[]>([]);
   const [loadFailed, setLoadFailed] = useState(false);
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('age');
+  useDocumentTitle('Phones');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -24,36 +26,44 @@ export function PhoneList() {
 
   return (
     <div className="container-fluid">
+      <h1 className="visually-hidden">Phones</h1>
       <div className="row">
         <div className="col-md-2">
-          {/*Sidebar content*/}
           <p>
-            Search: <input value={query} onChange={(event) => setQuery(event.target.value)} />
+            <label>
+              Search: <input value={query} onChange={(event) => setQuery(event.target.value)} />
+            </label>
           </p>
           <p>
-            Sort by:{' '}
-            <select
-              value={sortKey}
-              onChange={(event) => {
-                if (isSortKey(event.target.value)) setSortKey(event.target.value);
-              }}
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.key} value={option.key}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <label>
+              Sort by:{' '}
+              <select
+                value={sortKey}
+                onChange={(event) => {
+                  if (isSortKey(event.target.value)) setSortKey(event.target.value);
+                }}
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.key} value={option.key}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </p>
         </div>
         <div className="col-md-10">
-          {/*Body content*/}
           {loadFailed && <p role="alert">Sorry, we could not load the phones. Please try again later.</p>}
+          {/* Announces the number of results to screen reader users as they type. */}
+          <p role="status" className="visually-hidden">
+            {phones.length > 0 && `${visible.length} ${visible.length === 1 ? 'phone' : 'phones'} shown`}
+          </p>
           <ul className="phones">
             {visible.map((phone) => (
               <li key={phone.id} className="thumbnail phone-list-item">
-                <Link to={phoneHref(phone.id)} className="thumb">
-                  <img src={assetUrl(phone.imageUrl)} alt={phone.name} />
+                {/* The name link already says where this goes; hide the duplicate from keyboard and screen readers. */}
+                <Link to={phoneHref(phone.id)} className="thumb" tabIndex={-1} aria-hidden="true">
+                  <img src={assetUrl(phone.imageUrl)} alt="" />
                 </Link>
                 <Link to={phoneHref(phone.id)}>{phone.name}</Link>
                 <p>{phone.snippet}</p>

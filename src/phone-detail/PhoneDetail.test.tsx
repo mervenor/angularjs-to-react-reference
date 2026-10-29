@@ -27,9 +27,11 @@ describe('<PhoneDetail>', () => {
     await screen.findByRole('heading', { level: 1 });
     expect(mainImage(container)).toHaveAttribute('src', '/img/phones/nexus-s.0.jpg');
 
-    const thumbs = container.querySelectorAll<HTMLImageElement>('.phone-thumbs img');
-    await user.click(thumbs[2]!);
+    await user.click(screen.getByRole('button', { name: 'Show image 3 of 4' }));
     expect(mainImage(container)).toHaveAttribute('src', '/img/phones/nexus-s.2.jpg');
+    expect(mainImage(container)).toHaveAttribute('alt', 'Nexus S, view 3 of 4');
+    expect(screen.getByRole('button', { name: 'Show image 3 of 4' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Show image 1 of 4' })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('says so when the phone does not exist (new: the original showed an empty page)', async () => {
