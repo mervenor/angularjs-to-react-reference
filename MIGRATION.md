@@ -174,3 +174,42 @@ sign-off, not into a silent omission.
 
 **Tests:** 75 unit (40 from the oracle cases, 4 for the list component), 21 browser. All green;
 no browser test changed.
+
+## Step 3: the phone detail page becomes React
+
+**Tag:** `step-3`. **What changed:** the detail screen and the `checkmark` filter.
+
+Same pattern as step 2: `<phone-detail>` is now a React component registered through the bridge.
+The one new problem is input. The AngularJS component injected `$routeParams` to find out which
+phone to show; a React component should not know about AngularJS services. So the route now
+resolves the id and passes it in as a binding:
+
+```js
+template: '<phone-detail phone-id="$resolve.phoneId"></phone-detail>',
+resolve: { phoneId: ['$route', function($route) { return $route.current.params.phoneId; }] }
+```
+
+That keeps the React component a plain function of its props (`<PhoneDetail phoneId="nexus-s" />`),
+which is exactly what React Router will give it in step 4. This is the only edit we made to the
+original AngularJS code during the whole migration.
+
+- `checkmark` became a one-line TypeScript function with the same output.
+- The component handles three states the original ignored: loading (renders nothing, as before),
+  not found, and failed. The original showed an empty page skeleton for an unknown phone; the React
+  version says the phone was not found. Again: deliberate, tested, and listed for sign-off.
+- We kept a known HTML error from the original template (a `<dd>` outside any `<dl>` under
+  "Additional Features") so this step changes nothing a user could see. We fix it in step 5. Mixing
+  "port" and "improve" in one step makes failures harder to explain.
+
+### What we gave up
+
+The main image used to slide in and out using a jQuery animation registered with ngAnimate. React
+does not go through ngAnimate, so the image now swaps instantly. At this point jQuery is only loaded
+for an animation that no longer runs; it goes in step 5.
+
+The `Phone` service and the AngularJS `checkmark` filter are now unused by the app, but we leave
+them until step 5: steps 2 to 4 only add or replace; step 5 deletes. That keeps each diff easy to
+review.
+
+**Tests:** 80 unit (4 for the detail component, 1 for `checkmark`), 21 browser. All green; no
+browser test changed.

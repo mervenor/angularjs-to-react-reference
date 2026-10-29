@@ -9,7 +9,13 @@ angular.
           template: '<phone-list></phone-list>'
         }).
         when('/phones/:phoneId', {
-          template: '<phone-detail></phone-detail>'
+          // The React component gets the id as a prop instead of injecting $routeParams.
+          template: '<phone-detail phone-id="$resolve.phoneId"></phone-detail>',
+          resolve: {
+            phoneId: ['$route', function($route) {
+              return $route.current.params.phoneId;
+            }]
+          }
         }).
         otherwise('/phones');
     }

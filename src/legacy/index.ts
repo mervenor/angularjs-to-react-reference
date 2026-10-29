@@ -17,8 +17,6 @@ import './core/phone/phone.module.js';
 import './core/phone/phone.service.js';
 import './phone-list/phone-list.module.js';
 import './phone-detail/phone-detail.module.js';
-import './phone-detail/phone-detail.component.js';
-import './templates';
 import './react-components';
 
 export function bootstrapLegacyApp(element: Element) {
