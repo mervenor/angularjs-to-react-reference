@@ -16,10 +16,10 @@ import './core/checkmark/checkmark.filter.js';
 import './core/phone/phone.module.js';
 import './core/phone/phone.service.js';
 import './phone-list/phone-list.module.js';
-import './phone-list/phone-list.component.js';
 import './phone-detail/phone-detail.module.js';
 import './phone-detail/phone-detail.component.js';
 import './templates';
+import './react-components';
 
 export function bootstrapLegacyApp(element: Element) {
   // strictDi: fail fast if any injectable is not annotated (they all are).

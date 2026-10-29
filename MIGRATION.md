@@ -139,3 +139,38 @@ The browser tests now run against the production build (`vite build` then `vite 
 that is what users get.
 
 **Tests:** 28 unit (3 new for the bridge), 21 browser. All green, unchanged.
+
+## Step 2: the phone list becomes React
+
+**Tag:** `step-2`. **What changed:** the list screen, a typed data layer, and the search logic.
+
+The route template still says `<phone-list></phone-list>`. We registered a React component under
+that same name through the bridge (`src/legacy/react-components.ts`) and deleted the AngularJS
+component and its template. Nothing else in the AngularJS app had to know.
+
+- **Types (`src/phones/types.ts`)** for the list and detail data, written from the data contract
+  test in step 0 rather than from guesswork.
+- **Data layer (`src/phones/api.ts`)**: `fetchPhones` and `fetchPhone` with `fetch` and request
+  cancellation, replacing `$resource`. Same URLs. A failed request now throws a typed error.
+- **Search and sort (`src/phones/search.ts`)**: a port of AngularJS's `filter` and `orderBy`
+  for this use. It is checked against all 40 cases the AngularJS oracle recorded in step 0, and it
+  matched first time only because we had written those cases down. A "sensible" rewrite that
+  searched names only, or sorted with `localeCompare`, would have changed what users see.
+- **The component (`src/phone-list/PhoneList.tsx`)** keeps the original markup and CSS classes,
+  so the page looks the same and the browser tests did not change.
+
+### Behaviour we changed on purpose
+
+If the phone data fails to load, the original showed an empty list with no explanation. The React
+version shows a short message. It is the only visible change, it has its own test, and it is the
+kind of change a client should approve explicitly.
+
+### What we gave up
+
+The list items used to animate in and out as you typed (ngAnimate). The React list does not. We
+could add it back with a transition library, but adding a dependency to preserve a tutorial
+animation is not a good trade. On a client project this goes on the list of differences for
+sign-off, not into a silent omission.
+
+**Tests:** 75 unit (40 from the oracle cases, 4 for the list component), 21 browser. All green;
+no browser test changed.
